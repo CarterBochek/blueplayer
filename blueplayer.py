@@ -1,86 +1,80 @@
+# Music player in python
 import os
 import glob
 from pygame import mixer
-import tkinter as tk
 
-mixer.init()
+# mixer.init()
+# --------------------------Path of your music
+# mixer.music.load("/home/carter/Music/Polkavant - Signos.mp3")
 
-audio_files = []  # Global variable for storing audio files
-
+# mixer.music.play()
+print('\nWelcome to blueplayer!\n')
 def select_song():
-    global audio_files  # Access the global variable
+    # Get the user's home directory
     home_dir = os.path.expanduser("~")
+    
+    # Specify the subdirectory where the music files are located
     music_dir = os.path.join(home_dir, "Music")
+    
+    # Get a list of audio files in the music directory
     audio_files = glob.glob(os.path.join(music_dir, "*.mp3")) + glob.glob(os.path.join(music_dir, "*.wav"))
-
+    
     if not audio_files:
         print("\nNo audio files found in the Music directory.")
         return
+    
+    # Display the available songs to the user
+    print("\nAvailable songs:")
+    for i, audio_file in enumerate(audio_files):
+        print(f"{i+1}. {os.path.basename(audio_file)}")
+    
+    # Get the user's song choice
+    song_choice = input("Enter the song number: ")
+    
+    try:
+        song_choice = int(song_choice)
+        if song_choice < 1 or song_choice > len(audio_files):
+            raise ValueError
+    except ValueError:
+        print("\nInvalid song number.")
+        return
+    
+    # Load and play the selected song
+    song_path = audio_files[song_choice - 1]
+    mixer.music.load(song_path)
+    mixer.music.play()
+    print('\nBlueplayer is now playing...\n')
+# Initialize pygame.mixer
+mixer.init()
 
-    song_list.delete(0, tk.END)  # Clear the song list
+# Call the select_song() function to start the song selection process
+select_song()
+mixer.music.set_volume(0.5)
 
-    for audio_file in audio_files:
-        song_list.insert(tk.END, os.path.basename(audio_file))
+while True:
+    # print("Type 'pause' to pause")
+    # print("Type 'resume' to resume")
+    # print("Type 'volume' set volume; default is 0.5")
+    # print("Type 'stop' to stop")
+    print("\nType in 'help' if you want to view available settings")
 
-def play_selected_song():
-    selection = song_list.curselection()
-    if len(selection) == 1:
-        song_index = selection[0]
-        song_path = audio_files[song_index]
-        mixer.music.load(song_path)
-        mixer.music.play()
+    player_setting = input('\n')
 
-def pause_song():
-    mixer.music.pause()
-
-def resume_song():
-    mixer.music.unpause()
-
-def set_volume():
-    v = volume_scale.get()
-    mixer.music.set_volume(v)
-
-def stop_song():
-    mixer.music.stop()
-
-root = tk.Tk()
-root.title("Blueplayer")
-
-# Song list
-song_list = tk.Listbox(root)
-song_list.pack()
-# Set the window size to 500x300 pixels
-root.geometry("500x300")  
-# Set the background to white and text color to black
-song_list = tk.Listbox(root, bg="blue", fg="white")  
-
-# Select button
-select_button = tk.Button(root, text="Select Song", command=select_song)
-select_button.pack()
-
-# Play button
-play_button = tk.Button(root, text="Play", command=play_selected_song)
-play_button.pack()
-
-# Pause button
-pause_button = tk.Button(root, text="Pause", command=pause_song)
-pause_button.pack()
-
-# Resume button
-resume_button = tk.Button(root, text="Resume", command=resume_song)
-resume_button.pack()
-
-# Volume scale
-volume_scale = tk.Scale(root, from_=0.0, to=1.0, resolution=0.1, orient=tk.HORIZONTAL)
-volume_scale.set(0.5)
-volume_scale.pack()
-
-# Volume button
-volume_button = tk.Button(root, text="Set Volume", command=set_volume)
-volume_button.pack()
-
-# Stop button
-stop_button = tk.Button(root, text="Stop", command=stop_song)
-stop_button.pack()
-
-root.mainloop()
+    if player_setting == "pause":
+        mixer.music.pause()
+        print('\nBlueplayer is now paused...\n')
+    elif player_setting == "play":
+        mixer.music.unpause()
+        print('\nBlueplayer is now playing...\n')
+    elif player_setting == "volume":
+        v = float(input("\nEnter volume(0 to 1; 0.1 or 0.6 etc)\n"))
+        mixer.music.set_volume(v)
+    elif player_setting == 'help':
+        print("\nType 'pause' to pause\nType 'play' to resume playback\nType 'volume' to set volume; default is 0.5\nType 'select' to choose a different song\nType 'stop' to stop")
+    elif player_setting == 'select':
+        print('\nSelect a new song to play:\n')
+        select_song()
+    elif player_setting == "stop":
+        mixer.music.stop()
+        print('\nBlueplayer is now shutting down, thanks for stopping by!\n')
+        break
